@@ -27,7 +27,7 @@ let rec inputNumber prompt =
         printfn "Ошибка: введите положительное целое число."
         inputNumber prompt
 
-// Функция для ввода строки с сообщением
+// Функция для ввода строки 
 let inputString prompt =
     printf "%s" prompt
     Console.ReadLine()
@@ -54,7 +54,7 @@ let rec buildTree() =
         printfn "Неверный выбор. Пожалуйста, попробуйте снова."
         buildTree()
 
-// Улучшенная функция печати дерева с отступами
+// Внешний вид
 let rec printTree indent tree =
     match tree with
     | Leaf s -> 
