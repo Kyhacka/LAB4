@@ -1,0 +1,47 @@
+open System
+
+type Tree =
+    | Leaf of string
+    | Node of string * Tree * Tree
+
+let rec mapTree f tree =
+    match tree with
+    | Leaf s -> Leaf (f s)
+    | Node (s, left, right) -> Node (f s, mapTree f left, mapTree f right)
+
+let replaceFirstChar newChar s =
+    if String.IsNullOrEmpty(s) then s
+    else 
+        let rest = if s.Length > 1 then s.[1..] else ""
+        string newChar + rest
+
+let transformTree newChar tree =
+    mapTree (replaceFirstChar newChar) tree
+
+// Пример использования
+let sampleTree = 
+    Node ("apple", 
+        Leaf "banana", 
+        Node ("cherry", 
+            Leaf "date", 
+            Leaf "fig"))
+
+let transformedTree = transformTree 'X' sampleTree
+
+let rec printTree tree =
+    match tree with
+    | Leaf s -> printfn "Leaf: %s" s
+    | Node (s, left, right) -> 
+        printfn "Node: %s" s
+        printTree left
+        printTree right
+
+[<EntryPoint>]
+let main argv =
+    printfn "Исходное дерево:"
+    printTree sampleTree
+
+    printfn "\nПреобразованное дерево:"
+    printTree transformedTree
+
+    0
