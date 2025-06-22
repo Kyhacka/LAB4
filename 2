@@ -1,7 +1,41 @@
+open System
+
 type BinaryTree =
     | Node of int * BinaryTree * BinaryTree
     | Empty
 
+// Функция для безопасного ввода числа
+let rec inputNumber prompt =
+    printf "%s" prompt
+    match Int32.TryParse(Console.ReadLine()) with
+    | true, n -> n
+    | _ -> 
+        printfn "Ошибка: введите целое число."
+        inputNumber prompt
+
+// Рекурсивная функция для построения дерева
+let rec buildTree() =
+    printfn "\nСоздание элемента дерева:"
+    printfn "1 - Создать лист"
+    printfn "2 - Создать узел"
+    printf "Выберите вариант (1-2): "
+    
+    match Console.ReadLine() with
+    | "1" ->
+        let value = inputNumber "Введите значение для листа: "
+        Node(value, Empty, Empty)
+    | "2" ->
+        let value = inputNumber "Введите значение для узла: "
+        printfn "\nСоздание левого поддерева для узла %d:" value
+        let left = buildTree()
+        printfn "\nСоздание правого поддерева для узла %d:" value
+        let right = buildTree()
+        Node(value, left, right)
+    | _ ->
+        printfn "Неверный выбор. Пожалуйста, попробуйте снова."
+        buildTree()
+
+// Функция для сбора положительных листьев
 let getPositiveLeaves tree =
     let rec traverse acc = function
         | Empty -> acc
@@ -12,27 +46,37 @@ let getPositiveLeaves tree =
     
     traverse [] tree |> List.rev
 
-let binTree = 
-    Node(2, 
-        Node(1, Empty, Empty), 
-        Node(4, 
-            Node(3, Empty, Empty), 
-            Node(-5, Empty, Empty)))
 
-let rec printInOrder tree =
+let rec printTree indent tree =
     match tree with
-    | Node(data, left, right) ->
-        printInOrder left
-        printfn "Node %d" data
-        printInOrder right
-    | Empty -> ()
+    | Empty -> 
+        printfn "%s└── Empty" indent
+    | Node(value, Empty, Empty) -> 
+        printfn "%s└── Leaf: %d" indent value
+    | Node(value, left, right) -> 
+        printfn "%s├── Node: %d" indent value
+        printTree (indent + "│   ") left
+        printTree (indent + "    ") right
 
 [<EntryPoint>]
 let main argv =
-    printfn "Исходное дерево:"
-    printInOrder binTree
-
-    let positiveLeaves = getPositiveLeaves binTree
+    printfn "Программа для сбора положительных листьев дерева"
+    printfn "------------------------------------------------"
+    
+    // Ввод дерева
+    printfn "\nДавайте построим дерево:"
+    let tree = buildTree()
+    
+    // Вывод исходного дерева
+    printfn "\nВаше дерево:"
+    printTree "" tree
+    
+    // Сбор положительных листьев
+    let positiveLeaves = getPositiveLeaves tree
+    
+    // Вывод результата
     printfn "\nПоложительные листья дерева: %A" positiveLeaves
-
+    
+    printfn "\nНажмите любую клавишу для выхода..."
+    Console.ReadKey() |> ignore
     0
