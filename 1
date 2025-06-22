@@ -18,30 +18,84 @@ let replaceFirstChar newChar s =
 let transformTree newChar tree =
     mapTree (replaceFirstChar newChar) tree
 
-// Пример использования
-let sampleTree = 
-    Node ("apple", 
-        Leaf "banana", 
-        Node ("cherry", 
-            Leaf "date", 
-            Leaf "fig"))
+// Функция для безопасного ввода числа
+let rec inputNumber prompt =
+    printf "%s" prompt
+    match Int32.TryParse(Console.ReadLine()) with
+    | true, n when n > 0 -> n
+    | _ -> 
+        printfn "Ошибка: введите положительное целое число."
+        inputNumber prompt
 
-let transformedTree = transformTree 'X' sampleTree
+// Функция для ввода строки с сообщением
+let inputString prompt =
+    printf "%s" prompt
+    Console.ReadLine()
 
-let rec printTree tree =
+// Рекурсивная функция для построения дерева
+let rec buildTree() =
+    printfn "\nСоздание элемента дерева:"
+    printfn "1 - Создать лист"
+    printfn "2 - Создать узел"
+    printf "Выберите вариант (1 или 2): "
+    
+    match Console.ReadLine() with
+    | "1" ->
+        let value = inputString "Введите значение для листа: "
+        Leaf value
+    | "2" ->
+        let value = inputString "Введите значение для узла: "
+        printfn "\nСоздание левого поддерева для узла '%s':" value
+        let left = buildTree()
+        printfn "\nСоздание правого поддерева для узла '%s':" value
+        let right = buildTree()
+        Node(value, left, right)
+    | _ ->
+        printfn "Неверный выбор. Пожалуйста, попробуйте снова."
+        buildTree()
+
+// Улучшенная функция печати дерева с отступами
+let rec printTree indent tree =
     match tree with
-    | Leaf s -> printfn "Leaf: %s" s
+    | Leaf s -> 
+        printfn "%s└── Leaf: %s" indent s
     | Node (s, left, right) -> 
-        printfn "Node: %s" s
-        printTree left
-        printTree right
+        printfn "%s├── Node: %s" indent s
+        printTree (indent + "│   ") left
+        printTree (indent + "    ") right
 
 [<EntryPoint>]
 let main argv =
-    printfn "Исходное дерево:"
-    printTree sampleTree
-
-    printfn "\nПреобразованное дерево:"
-    printTree transformedTree
-
+    printfn "Программа для замены первого символа в дереве строк"
+    printfn "--------------------------------------------------"
+    
+    // Ввод дерева
+    printfn "\nДавайте построим дерево:"
+    let tree = buildTree()
+    
+    // Вывод исходного дерева
+    printfn "\nВаше дерево:"
+    printTree "" tree
+    
+    // Ввод символа для замены
+    let rec inputChar() =
+        printf "\nВведите символ для замены первого символа в строках: "
+        let input = Console.ReadLine()
+        if not (String.IsNullOrEmpty(input)) && input.Length = 1 then
+            input.[0]
+        else
+            printfn "Ошибка: введите ровно один символ."
+            inputChar()
+    
+    let replaceChar = inputChar()
+    
+    // Преобразование дерева
+    let transformedTree = transformTree replaceChar tree
+    
+    // Вывод результата
+    printfn "\nРезультат преобразования:"
+    printTree "" transformedTree
+    
+    printfn "\nНажмите любую клавишу для выхода..."
+    Console.ReadKey() |> ignore
     0
