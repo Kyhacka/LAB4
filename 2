@@ -35,17 +35,24 @@ let rec buildTree() =
         printfn "Неверный выбор. Пожалуйста, попробуйте снова."
         buildTree()
 
-// Функция для сбора положительных листьев
-let getPositiveLeaves tree =
-    let rec traverse acc = function
-        | Empty -> acc
-        | Node(value, Empty, Empty) when value > 0 -> value :: acc
-        | Node(_, left, right) ->
-            let accLeft = traverse acc left
-            traverse accLeft right
-    
-    traverse [] tree |> List.rev
+// Реализация fold для BinaryTree
+let rec fold emptyFunc nodeFunc acc tree =
+    match tree with
+    | Empty -> emptyFunc acc
+    | Node(value, left, right) ->
+        let accAfterLeft = fold emptyFunc nodeFunc acc left
+        let accAfterRight = fold emptyFunc nodeFunc accAfterLeft right
+        nodeFunc value accAfterRight
 
+// Функция для сбора положительных листьев через fold
+let getPositiveLeaves tree =
+    let emptyCase acc = acc  // Для Empty возвращаем аккумулятор без изменений
+    let nodeCase value acc =
+        // Проверяем, является ли узел листом (оба поддерева Empty) и значение > 0
+        match tree with
+        | Node(v, Empty, Empty) when v > 0 -> v :: acc
+        | _ -> acc
+    fold emptyCase nodeCase [] tree |> List.rev
 
 let rec printTree indent tree =
     match tree with
@@ -71,7 +78,7 @@ let main argv =
     printfn "\nВаше дерево:"
     printTree "" tree
     
-    // Сбор положительных листьев
+    // Сбор положительных листьев с использованием fold
     let positiveLeaves = getPositiveLeaves tree
     
     // Вывод результата
