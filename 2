@@ -40,19 +40,20 @@ let rec fold emptyFunc nodeFunc acc tree =
     match tree with
     | Empty -> emptyFunc acc
     | Node(value, left, right) ->
-        let accAfterLeft = fold emptyFunc nodeFunc acc left
-        let accAfterRight = fold emptyFunc nodeFunc accAfterLeft right
-        nodeFunc value accAfterRight
+        let leftResult = fold emptyFunc nodeFunc acc left
+        let rightResult = fold emptyFunc nodeFunc acc right
+        nodeFunc value leftResult rightResult
 
 // Функция для сбора положительных листьев через fold
 let getPositiveLeaves tree =
-    let emptyCase acc = acc  // Для Empty возвращаем аккумулятор без изменений
-    let nodeCase value acc =
-        // Проверяем, является ли узел листом (оба поддерева Empty) и значение > 0
-        match tree with
-        | Node(v, Empty, Empty) when v > 0 -> v :: acc
-        | _ -> acc
-    fold emptyCase nodeCase [] tree |> List.rev
+    let emptyCase acc = acc
+    let nodeCase value leftAcc rightAcc =
+        // Если оба поддерева пустые (значит это лист) и значение положительное
+        if leftAcc = [] && rightAcc = [] && value > 0 then
+            [value]
+        else
+            leftAcc @ rightAcc
+    fold emptyCase nodeCase [] tree
 
 let rec printTree indent tree =
     match tree with
